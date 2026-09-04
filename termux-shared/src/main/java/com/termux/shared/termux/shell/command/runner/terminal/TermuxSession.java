@@ -135,7 +135,6 @@ public class TermuxSession {
         List<String> argList = new ArrayList<>();
         if (useProot) {
             argList.add("proot");
-            argList.add("-0"); // emulate root so apt/dpkg don't complain about uid mismatch
             argList.add("-b");
             argList.add(com.termux.shared.termux.TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH + ":/data/data/com.termux");
             argList.add("-w");

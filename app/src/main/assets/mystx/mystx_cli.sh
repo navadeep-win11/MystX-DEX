@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/data/data/com.termux/files/usr/bin/sh
 #
 # MystX DEX — CLI Control Tool
 # Usage: mystx [start|stop|restart|status|help]
