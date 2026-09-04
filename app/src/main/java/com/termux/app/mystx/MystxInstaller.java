@@ -209,6 +209,16 @@ public class MystxInstaller {
                     copyAssetToFile(context, ASSET_BASE + "/proot/" + arch + "/libexec/proot/" + l, new File(libexec, l), true);
                 }
             }
+            
+            File lib = new File(TermuxConstants.TERMUX_LIB_PREFIX_DIR_PATH);
+            if (!lib.exists()) lib.mkdirs();
+            
+            String[] libs = context.getAssets().list(ASSET_BASE + "/proot/" + arch + "/lib");
+            if (libs != null) {
+                for (String l : libs) {
+                    copyAssetToFile(context, ASSET_BASE + "/proot/" + arch + "/lib/" + l, new File(lib, l), false);
+                }
+            }
         } catch (Exception e) {
             Logger.logStackTraceWithMessage(LOG_TAG, "Failed setting up PRoot", e);
         }

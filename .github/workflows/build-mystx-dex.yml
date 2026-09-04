@@ -42,19 +42,35 @@ jobs:
           mkdir -p app/src/main/assets/mystx/proot
           ARCHS=("aarch64" "arm" "i686" "x86_64")
           PROOT_VERSION="5.1.107.92"
+          LIBTALLOC_VERSION="2.4.3"
+          LIBANDROID_SHMEM_VERSION="0.7"
           for arch in "${ARCHS[@]}"; do
               echo "Downloading proot for $arch..."
               wget -q "https://packages-cf.termux.dev/apt/termux-main/pool/main/p/proot/proot_${PROOT_VERSION}_${arch}.deb"
+              wget -q "https://packages-cf.termux.dev/apt/termux-main/pool/main/libt/libtalloc/libtalloc_${LIBTALLOC_VERSION}_${arch}.deb"
+              wget -q "https://packages-cf.termux.dev/apt/termux-main/pool/main/liba/libandroid-shmem/libandroid-shmem_${LIBANDROID_SHMEM_VERSION}_${arch}.deb"
+              
               mkdir -p proot_extracted_$arch
               cd proot_extracted_$arch
               ar x "../proot_${PROOT_VERSION}_${arch}.deb"
               tar xf data.tar.xz ./data/data/com.termux/files/usr/bin ./data/data/com.termux/files/usr/libexec
+              
+              ar x "../libtalloc_${LIBTALLOC_VERSION}_${arch}.deb"
+              tar xf data.tar.xz ./data/data/com.termux/files/usr/lib
+              
+              ar x "../libandroid-shmem_${LIBANDROID_SHMEM_VERSION}_${arch}.deb"
+              tar xf data.tar.xz ./data/data/com.termux/files/usr/lib
+              
               cd ..
               mkdir -p "app/src/main/assets/mystx/proot/$arch/bin"
               mkdir -p "app/src/main/assets/mystx/proot/$arch/libexec/proot"
+              mkdir -p "app/src/main/assets/mystx/proot/$arch/lib"
+              
               cp "proot_extracted_$arch/data/data/com.termux/files/usr/bin/proot" "app/src/main/assets/mystx/proot/$arch/bin/"
               cp "proot_extracted_$arch/data/data/com.termux/files/usr/libexec/proot/"* "app/src/main/assets/mystx/proot/$arch/libexec/proot/"
-              rm -rf "proot_${PROOT_VERSION}_${arch}.deb" "proot_extracted_$arch"
+              cp -d "proot_extracted_$arch/data/data/com.termux/files/usr/lib/"*.so* "app/src/main/assets/mystx/proot/$arch/lib/" 2>/dev/null || true
+              
+              rm -rf "proot_${PROOT_VERSION}_${arch}.deb" "libtalloc_${LIBTALLOC_VERSION}_${arch}.deb" "libandroid-shmem_${LIBANDROID_SHMEM_VERSION}_${arch}.deb" "proot_extracted_$arch"
           done
           echo "PRoot binaries bundled into assets."
 
