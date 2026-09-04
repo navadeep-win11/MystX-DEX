@@ -37,6 +37,27 @@ jobs:
       - name: Grant Execute Permission to Gradlew
         run: chmod +x gradlew
 
+      - name: Fetch PRoot Binaries
+        run: |
+          mkdir -p app/src/main/assets/mystx/proot
+          ARCHS=("aarch64" "arm" "i686" "x86_64")
+          PROOT_VERSION="5.1.107.92"
+          for arch in "${ARCHS[@]}"; do
+              echo "Downloading proot for $arch..."
+              wget -q "https://packages-cf.termux.dev/apt/termux-main/pool/main/p/proot/proot_${PROOT_VERSION}_${arch}.deb"
+              mkdir -p proot_extracted_$arch
+              cd proot_extracted_$arch
+              ar x "../proot_${PROOT_VERSION}_${arch}.deb"
+              tar xf data.tar.xz ./data/data/com.termux/files/usr/bin ./data/data/com.termux/files/usr/libexec
+              cd ..
+              mkdir -p "app/src/main/assets/mystx/proot/$arch/bin"
+              mkdir -p "app/src/main/assets/mystx/proot/$arch/libexec/proot"
+              cp "proot_extracted_$arch/data/data/com.termux/files/usr/bin/proot" "app/src/main/assets/mystx/proot/$arch/bin/"
+              cp "proot_extracted_$arch/data/data/com.termux/files/usr/libexec/proot/"* "app/src/main/assets/mystx/proot/$arch/libexec/proot/"
+              rm -rf "proot_${PROOT_VERSION}_${arch}.deb" "proot_extracted_$arch"
+          done
+          echo "PRoot binaries bundled into assets."
+
       - name: Build MystX DEX Debug APK
         env:
           TERMUX_PACKAGE_VARIANT: apt-android-7
@@ -77,8 +98,8 @@ jobs:
       - name: Attach APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.118.3
-          name: MystX DEX v0.118.3 (Full Termux Parity, Mirror SSL & Native Shell Fix)
+          tag_name: v0.118.4
+          name: MystX DEX v0.118.4 (PRoot Integration for Complete Environment Isolation)
           files: |
             app/build/outputs/apk/debug/MystX-Dex-v*.apk
             app/build/outputs/apk/debug/*.apk

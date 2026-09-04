@@ -62,6 +62,9 @@ public class MystxInstaller {
         // 6. Setup am wrapper
         setupAmWrapper();
 
+        // 7. Setup PRoot
+        setupProot(context);
+
         Logger.logInfo(LOG_TAG, "MystX DEX assets and configs installed successfully.");
     }
 
@@ -177,6 +180,37 @@ public class MystxInstaller {
             } catch (Exception ignored) {}
         } catch (Exception e) {
             Logger.logStackTraceWithMessage(LOG_TAG, "Failed creating am wrapper", e);
+        }
+    }
+
+    private static void setupProot(Context context) {
+        String abi = android.os.Build.SUPPORTED_ABIS[0];
+        String arch;
+        if (abi.startsWith("arm64") || abi.startsWith("aarch64")) {
+            arch = "aarch64";
+        } else if (abi.startsWith("armeabi") || abi.startsWith("arm")) {
+            arch = "arm";
+        } else if (abi.startsWith("x86_64")) {
+            arch = "x86_64";
+        } else {
+            arch = "i686";
+        }
+        
+        try {
+            File prootBin = new File(TermuxConstants.TERMUX_BIN_PREFIX_DIR, "proot");
+            copyAssetToFile(context, ASSET_BASE + "/proot/" + arch + "/bin/proot", prootBin, true);
+            
+            File libexec = new File(TermuxConstants.TERMUX_PREFIX_DIR_PATH, "libexec/proot");
+            if (!libexec.exists()) libexec.mkdirs();
+            
+            String[] loaders = context.getAssets().list(ASSET_BASE + "/proot/" + arch + "/libexec/proot");
+            if (loaders != null) {
+                for (String l : loaders) {
+                    copyAssetToFile(context, ASSET_BASE + "/proot/" + arch + "/libexec/proot/" + l, new File(libexec, l), true);
+                }
+            }
+        } catch (Exception e) {
+            Logger.logStackTraceWithMessage(LOG_TAG, "Failed setting up PRoot", e);
         }
     }
 

@@ -126,11 +126,33 @@ public class TermuxSession {
         String executableBaseName = ShellUtils.getExecutableBasename(executionCommand.executable);
         String processName = (isLoginShell ? "-" : "") + executableBaseName;
 
+        if (executionCommand.commandLabel == null)
+            executionCommand.commandLabel = processName;
+
+        File prootFile = new File(com.termux.shared.termux.TermuxConstants.TERMUX_PREFIX_DIR_PATH, "bin/proot");
+        boolean useProot = prootFile.exists() && prootFile.canExecute() && !executionCommand.executable.endsWith("proot");
+
         List<String> argList = new ArrayList<>();
-        argList.add(processName);
+        if (useProot) {
+            argList.add("proot");
+            argList.add("-0"); // emulate root so apt/dpkg don't complain about uid mismatch
+            argList.add("-b");
+            argList.add(com.termux.shared.termux.TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH + ":/data/data/com.termux");
+            argList.add("-w");
+            argList.add(executionCommand.workingDirectory);
+            argList.add(executionCommand.executable);
+            
+            if (isLoginShell && "bash".equals(executableBaseName)) {
+                argList.add("--login"); // Ensure it acts as login shell since argv[0] hack is lost
+            }
+        } else {
+            argList.add(processName);
+        }
+
         if (isLoginShell && "bash".equals(executableBaseName)) {
             argList.add("--noprofile");
         }
+        
         if (commandArgs.length > 1) {
             for (int i = 1; i < commandArgs.length; i++) {
                 argList.add(commandArgs[i]);
@@ -138,9 +160,15 @@ public class TermuxSession {
         }
 
         executionCommand.arguments = argList.toArray(new String[0]);
+        if (useProot) {
+            executionCommand.executable = prootFile.getAbsolutePath();
+            if (additionalEnvironment == null) additionalEnvironment = new HashMap<>();
+            additionalEnvironment.put("PROOT_LOADER", com.termux.shared.termux.TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/libexec/proot/loader");
+            additionalEnvironment.put("PROOT_LOADER_32", com.termux.shared.termux.TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/libexec/proot/loader32");
+            additionalEnvironment.put("PROOT_TMP_DIR", com.termux.shared.termux.TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/tmp");
+        }
 
-        if (executionCommand.commandLabel == null)
-            executionCommand.commandLabel = processName;
+        // Duplicate removed
 
         // Setup command environment
         HashMap<String, String> environment = shellEnvironmentClient.setupShellCommandEnvironment(currentPackageContext,
