@@ -5,14 +5,12 @@ on:
     branches:
       - master
       - main
-      - 'release/**'
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - master
-      - main
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -54,10 +52,13 @@ jobs:
           echo "MYSTX_VERSION=$VERSION" >> $GITHUB_ENV
           echo "==> MystX DEX Version: $VERSION"
 
-          # Verify universal or architecture APK was generated
-          find "$APK_DIR" -name "*.apk" | while read -r apk_file; do
-            echo "Found generated APK: $apk_file"
-          done
+          # Create friendly named APKs
+          UNIVERSAL_APK=$(find "$APK_DIR" -name "*universal*.apk" | head -n 1)
+          if [ -f "$UNIVERSAL_APK" ]; then
+            cp "$UNIVERSAL_APK" "$APK_DIR/MystX-Dex-v${VERSION}.apk"
+            cp "$UNIVERSAL_APK" "$APK_DIR/MystX-Dex-v${VERSION}-universal.apk"
+            echo "Created $APK_DIR/MystX-Dex-v${VERSION}.apk from $UNIVERSAL_APK"
+          fi
 
       - name: Upload Universal APK Artifact
         uses: actions/upload-artifact@v4
@@ -74,10 +75,14 @@ jobs:
           if-no-files-found: error
 
       - name: Attach APK to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/debug/*.apk
-          name: MystX DEX Release ${{ github.ref_name }}
+          tag_name: v0.118.0
+          name: MystX DEX v0.118.0
+          files: |
+            app/build/outputs/apk/debug/MystX-Dex-v*.apk
+            app/build/outputs/apk/debug/*.apk
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
