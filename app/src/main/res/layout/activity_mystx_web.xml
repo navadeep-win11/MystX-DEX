@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0b0f19">
+
+    <!-- Top Action Bar -->
+    <LinearLayout
+        android:id="@+id/mystx_web_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#121829"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <ImageButton
+            android:id="@+id/btn_back_to_terminal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_new_session"
+            android:contentDescription="@string/action_switch_to_terminal"
+            android:tint="#00f0ff" />
+
+        <TextView
+            android:id="@+id/txt_mystx_web_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="@string/mystx_web_title"
+            android:textColor="#f8fafc"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_reload_web"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:contentDescription="Reload"
+            android:tint="#94a3b8" />
+
+        <ImageButton
+            android:id="@+id/btn_open_in_browser"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_compass"
+            android:contentDescription="@string/mystx_web_open_browser"
+            android:tint="#94a3b8" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/mystx_web_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <!-- Main Container Frame -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <WebView
+            android:id="@+id/mystx_webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#0b0f19" />
+
+        <!-- Error / Offline Overlay -->
+        <LinearLayout
+            android:id="@+id/layout_offline_hint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:background="#0b0f19"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MystX DEX Web Server"
+                android:textColor="#00f0ff"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/mystx_web_start_hint"
+                android:textColor="#94a3b8"
+                android:textSize="14sp"
+                android:gravity="center" />
+
+            <Button
+                android:id="@+id/btn_retry_connection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/mystx_web_retry"
+                android:textColor="#000000"
+                android:backgroundTint="#00f0ff" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>
