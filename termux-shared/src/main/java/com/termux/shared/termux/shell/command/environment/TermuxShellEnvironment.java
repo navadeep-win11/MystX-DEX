@@ -89,7 +89,7 @@ public class TermuxShellEnvironment extends AndroidShellEnvironment {
         environment.put("TERMUX_APP__LEGACY_DATA_DIR", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
         environment.put("TERMUX_APP__DATA_DIR", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
         environment.put("TERMUX__PREFIX", TermuxConstants.TERMUX_PREFIX_DIR_PATH);
-        environment.put("TERMUX__ROOTFS_DIR", TermuxConstants.TERMUX_ROOTFS_DIR_PATH);
+        environment.put("TERMUX__ROOTFS_DIR", TermuxConstants.TERMUX_FILES_DIR_PATH);
         environment.put("TERMUX__HOME", TermuxConstants.TERMUX_HOME_DIR_PATH);
 
         // If failsafe is not enabled, then we keep default PATH and TMPDIR so that system binaries can be used
