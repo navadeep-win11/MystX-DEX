@@ -78,6 +78,20 @@ public class TermuxShellEnvironment extends AndroidShellEnvironment {
         environment.put(ENV_HOME, TermuxConstants.TERMUX_HOME_DIR_PATH);
         environment.put(ENV_PREFIX, TermuxConstants.TERMUX_PREFIX_DIR_PATH);
 
+        // Required paths for custom package namespace (com.mystx.dex)
+        environment.put("SSL_CERT_FILE", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/etc/tls/cert.pem");
+        environment.put("CURL_CA_BUNDLE", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/etc/tls/cert.pem");
+        environment.put("TERMINFO", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/share/terminfo");
+        environment.put("TERMINFO_DIRS", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/share/terminfo");
+        environment.put("APT_CONFIG", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/etc/apt/apt.conf");
+        environment.put("DPKG_ADMINDIR", TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/var/lib/dpkg");
+        environment.put("PYTHONHOME", TermuxConstants.TERMUX_PREFIX_DIR_PATH);
+        environment.put("TERMUX_APP__LEGACY_DATA_DIR", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
+        environment.put("TERMUX_APP__DATA_DIR", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
+        environment.put("TERMUX__PREFIX", TermuxConstants.TERMUX_PREFIX_DIR_PATH);
+        environment.put("TERMUX__ROOTFS_DIR", TermuxConstants.TERMUX_ROOTFS_DIR_PATH);
+        environment.put("TERMUX__HOME", TermuxConstants.TERMUX_HOME_DIR_PATH);
+
         // If failsafe is not enabled, then we keep default PATH and TMPDIR so that system binaries can be used
         if (!isFailSafe) {
             environment.put(ENV_TMPDIR, TermuxConstants.TERMUX_TMP_PREFIX_DIR_PATH);

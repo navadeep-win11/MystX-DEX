@@ -58,17 +58,24 @@ class TerminalSession:
 
         # Default shell detection
         if not command:
+            prefix = os.environ.get("PREFIX", "/data/data/com.mystx.dex/files/usr")
+            mystx_bash = os.path.join(prefix, "bin/bash")
+            mystx_sh = os.path.join(prefix, "bin/sh")
             termux_bash = "/data/data/com.termux/files/usr/bin/bash"
             termux_sh = "/data/data/com.termux/files/usr/bin/sh"
-            if os.path.exists(termux_bash):
+            if os.path.exists(mystx_bash):
+                shell = mystx_bash
+            elif os.path.exists(termux_bash):
                 shell = termux_bash
+            elif os.path.exists(mystx_sh):
+                shell = mystx_sh
             elif os.path.exists(termux_sh):
                 shell = termux_sh
             else:
                 shell = os.environ.get("SHELL", "/system/bin/sh")
             command = [shell]
 
-        self.cwd = cwd or os.environ.get("HOME", "/data/data/com.termux/files/home")
+        self.cwd = cwd or os.environ.get("HOME", "/data/data/com.mystx.dex/files/home")
         if not os.path.exists(self.cwd):
             self.cwd = os.getcwd()
 

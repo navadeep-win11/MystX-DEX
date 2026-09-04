@@ -43,14 +43,24 @@ check_python() {
   if command -v python3 >/dev/null 2>&1; then
     return 0
   fi
+  if command -v python >/dev/null 2>&1; then
+    return 0
+  fi
   log_err "[!] Python 3 is required to run MystX DEX Web Server."
   echo "Installing Python 3 via package manager..."
+
+  export SSL_CERT_FILE="${SSL_CERT_FILE:-$PREFIX/etc/tls/cert.pem}"
+  export CURL_CA_BUNDLE="${CURL_CA_BUNDLE:-$PREFIX/etc/tls/cert.pem}"
+  export APT_CONFIG="${APT_CONFIG:-$PREFIX/etc/apt/apt.conf}"
+  export DPKG_ADMINDIR="${DPKG_ADMINDIR:-$PREFIX/var/lib/dpkg}"
+  export PYTHONHOME="${PYTHONHOME:-$PREFIX}"
+
   if command -v pkg >/dev/null 2>&1; then
     pkg install -y python
   elif command -v apt >/dev/null 2>&1; then
     apt update && apt install -y python
   fi
-  if command -v python3 >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
     return 0
   fi
   log_err "[!] Failed to install python3 automatically. Please run: pkg install python"
@@ -95,24 +105,43 @@ wait_for_server() {
 
 launch_gui() {
   log_info "[*] Opening MystX DEX Web GUI..."
-  # Attempt 1: MystX DEX Built-in WebView Activity
-  if command -v am >/dev/null 2>&1; then
-    if am start -n com.mystx.dex/com.termux.app.activities.MystxWebActivity >/dev/null 2>&1; then
+
+  # Attempt 1: termux-am socket server
+  if command -v termux-am >/dev/null 2>&1; then
+    if termux-am start -n com.mystx.dex/com.termux.app.activities.MystxWebActivity >/dev/null 2>&1; then
+      log_success "[✓] MystX DEX Web Activity launched."
       return 0
     fi
-    if am start -n com.termux/.app.activities.MystxWebActivity >/dev/null 2>&1; then
-      return 0
-    fi
-    # Attempt 2: Standard Android Browser view intent
-    if am start -a android.intent.action.VIEW -d "$URL" >/dev/null 2>&1; then
+    if termux-am start -a android.intent.action.VIEW -d "$URL" >/dev/null 2>&1; then
+      log_success "[✓] Browser launched via termux-am."
       return 0
     fi
   fi
 
-  # Attempt 3: termux-open-url if installed
+  # Attempt 2: am binary wrapper
+  if command -v am >/dev/null 2>&1; then
+    if am start -n com.mystx.dex/com.termux.app.activities.MystxWebActivity >/dev/null 2>&1; then
+      log_success "[✓] MystX DEX Web Activity launched."
+      return 0
+    fi
+    if am start -a android.intent.action.VIEW -d "$URL" >/dev/null 2>&1; then
+      log_success "[✓] Browser launched via am."
+      return 0
+    fi
+  fi
+
+  # Attempt 3: termux-open-url if available
   if command -v termux-open-url >/dev/null 2>&1; then
-    termux-open-url "$URL"
-    return 0
+    if termux-open-url "$URL" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+
+  # Attempt 4: termux-open if available
+  if command -v termux-open >/dev/null 2>&1; then
+    if termux-open "$URL" >/dev/null 2>&1; then
+      return 0
+    fi
   fi
 
   log_success "[✓] Access Web GUI at: $URL"

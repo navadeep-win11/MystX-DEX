@@ -20,6 +20,7 @@ import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -122,13 +123,21 @@ public class TermuxSession {
         String[] commandArgs = shellEnvironmentClient.setupShellCommandArguments(executionCommand.executable, executionCommand.arguments);
 
         executionCommand.executable = commandArgs[0];
-        String processName = (isLoginShell ? "-" : "") + ShellUtils.getExecutableBasename(executionCommand.executable);
+        String executableBaseName = ShellUtils.getExecutableBasename(executionCommand.executable);
+        String processName = (isLoginShell ? "-" : "") + executableBaseName;
 
-        String[] arguments = new String[commandArgs.length];
-        arguments[0] = processName;
-        if (commandArgs.length > 1) System.arraycopy(commandArgs, 1, arguments, 1, commandArgs.length - 1);
+        List<String> argList = new ArrayList<>();
+        argList.add(processName);
+        if (isLoginShell && "bash".equals(executableBaseName)) {
+            argList.add("--noprofile");
+        }
+        if (commandArgs.length > 1) {
+            for (int i = 1; i < commandArgs.length; i++) {
+                argList.add(commandArgs[i]);
+            }
+        }
 
-        executionCommand.arguments = arguments;
+        executionCommand.arguments = argList.toArray(new String[0]);
 
         if (executionCommand.commandLabel == null)
             executionCommand.commandLabel = processName;
