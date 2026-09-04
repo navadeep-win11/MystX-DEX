@@ -25,9 +25,11 @@ import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -172,6 +174,9 @@ final class TermuxInstaller {
                                     if (parts.length != 2)
                                         throw new RuntimeException("Malformed symlink line: " + line);
                                     String oldPath = parts[0];
+                                    if (oldPath.contains("/data/data/com.termux")) {
+                                        oldPath = oldPath.replace("/data/data/com.termux", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
+                                    }
                                     String newPath = TERMUX_STAGING_PREFIX_DIR_PATH + "/" + parts[1];
                                     symlinks.add(Pair.create(oldPath, newPath));
 
@@ -193,10 +198,23 @@ final class TermuxInstaller {
                                 }
 
                                 if (!isDirectory) {
+                                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                                    int readBytes;
+                                    while ((readBytes = zipInput.read(buffer)) != -1)
+                                        byteStream.write(buffer, 0, readBytes);
+                                    byte[] fileBytes = byteStream.toByteArray();
+
+                                    // Replace hardcoded termux package paths in non-ELF files (scripts, configs, etc.)
+                                    if (fileBytes.length >= 4 && (fileBytes[0] != 0x7f || fileBytes[1] != 'E' || fileBytes[2] != 'L' || fileBytes[3] != 'F')) {
+                                        String str = new String(fileBytes, StandardCharsets.UTF_8);
+                                        if (str.contains("/data/data/com.termux")) {
+                                            str = str.replace("/data/data/com.termux", TermuxConstants.TERMUX_INTERNAL_PRIVATE_APP_DATA_DIR_PATH);
+                                            fileBytes = str.getBytes(StandardCharsets.UTF_8);
+                                        }
+                                    }
+
                                     try (FileOutputStream outStream = new FileOutputStream(targetFile)) {
-                                        int readBytes;
-                                        while ((readBytes = zipInput.read(buffer)) != -1)
-                                            outStream.write(buffer, 0, readBytes);
+                                        outStream.write(fileBytes);
                                     }
                                     if (zipEntryName.startsWith("bin/") || zipEntryName.startsWith("libexec") ||
                                         zipEntryName.startsWith("lib/apt/apt-helper") || zipEntryName.startsWith("lib/apt/methods")) {
