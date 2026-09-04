@@ -77,8 +77,8 @@ jobs:
       - name: Attach APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.118.0
-          name: MystX DEX v0.118.0
+          tag_name: v0.118.1
+          name: MystX DEX v0.118.1 (Full Bootstrap & CLI Fix)
           files: |
             app/build/outputs/apk/debug/MystX-Dex-v*.apk
             app/build/outputs/apk/debug/*.apk

@@ -102,14 +102,17 @@ final class TermuxInstaller {
             return;
         }
 
-        // If prefix directory exists, even if its a symlink to a valid directory and symlink is not broken/dangling
-        if (FileUtils.directoryFileExists(TERMUX_PREFIX_DIR_PATH, true)) {
-            if (TermuxFileUtils.isTermuxPrefixDirectoryEmpty()) {
-                Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" exists but is empty or only contains specific unimportant files.");
-            } else {
-                whenDone.run();
-                return;
-            }
+        // If prefix directory exists and contains a valid executable shell binary
+        File loginFile = new File(TERMUX_BIN_PREFIX_DIR_PATH, "login");
+        File bashFile = new File(TERMUX_BIN_PREFIX_DIR_PATH, "bash");
+        File shFile = new File(TERMUX_BIN_PREFIX_DIR_PATH, "sh");
+        if (FileUtils.directoryFileExists(TERMUX_PREFIX_DIR_PATH, true) &&
+            (loginFile.canExecute() || bashFile.canExecute() || shFile.canExecute())) {
+            try {
+                com.termux.app.mystx.MystxInstaller.install(activity);
+            } catch (Exception ignored) {}
+            whenDone.run();
+            return;
         } else if (FileUtils.fileExists(TERMUX_PREFIX_DIR_PATH, false)) {
             Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" does not exist but another file exists at its destination.");
         }

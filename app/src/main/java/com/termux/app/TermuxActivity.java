@@ -251,8 +251,6 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
 
         setMystxWebButtonView();
 
-        MystxInstaller.installIfNeeded(this);
-
         setNewSessionButtonView();
 
         setToggleKeyboardView();
